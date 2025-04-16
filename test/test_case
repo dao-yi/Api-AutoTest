@@ -1,0 +1,35 @@
+import unittest
+import requests
+import json
+
+class APITestCase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # 读取测试用例集
+        with open('test_cases.json', 'r', encoding='utf-8') as f:
+            cls.test_cases = json.load(f)
+        cls.base_url = "http://your-api-endpoint.com"
+
+    def test_api_cases(self):
+        for case in self.test_cases:
+            with self.subTest(case=case):
+                self.run_test_case(case)
+
+    def run_test_case(self, case):
+        url = self.base_url + case["接口地址"]
+        method = case["请求方式"].upper()
+        data = case["用例数据"]
+        expected_result = case["预期结果"]
+
+        if method == "GET":
+            response = requests.get(url, params=data)
+        elif method == "POST":
+            response = requests.post(url, json=data)
+        else:
+            self.fail(f"不支持的请求方式: {method}")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), expected_result)
+
+if __name__ == '__main__':
+    unittest.main()
